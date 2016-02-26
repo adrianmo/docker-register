@@ -13,12 +13,6 @@ if not etcd_host:
     print "ETCD_HOST not set"
     sys.exit(1)
 
-try:
-    socket.gethostbyname(etcd_host)
-except:
-    print "ETCD_HOST not valid"
-    sys.exit(1)
-
 port = 4001
 host = etcd_host
 
