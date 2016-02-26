@@ -1,14 +1,14 @@
 FROM ubuntu:14.04
-MAINTAINER Jason Wilder <jason@influxdb.com>
+MAINTAINER Adrian Moreno <adrian@morenomartinez.com>
 
-RUN apt-get update
-RUN apt-get install -y wget python python-pip python-dev libssl-dev libffi-dev bash
+RUN apt-get update &&\
+  apt-get install -y wget python python-pip python-dev libssl-dev libffi-dev bash
 
 RUN mkdir /app
 WORKDIR /app
 
-RUN wget https://github.com/jwilder/docker-gen/releases/download/0.3.3/docker-gen-linux-amd64-0.3.3.tar.gz
-RUN tar xvzf docker-gen-linux-amd64-0.3.3.tar.gz -C /usr/local/bin
+RUN wget https://github.com/jwilder/docker-gen/releases/download/0.7.0/docker-gen-linux-amd64-0.7.0.tar.gz &&\
+  tar xvzf docker-gen-linux-amd64-0.7.0.tar.gz -C /usr/local/bin
 
 RUN pip install python-etcd
 

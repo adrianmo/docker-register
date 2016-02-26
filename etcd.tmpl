@@ -1,13 +1,22 @@
-
 #!/usr/bin/python
 
 import etcd
 import sys
+import socket
 from urlparse import urlparse
+
+# Genenerated by {{ .Env.USER }}
+# Docker Version {{ .Docker.Version }}
 
 etcd_host = "{{ .Env.ETCD_HOST }}"
 if not etcd_host:
     print "ETCD_HOST not set"
+    sys.exit(1)
+
+try:
+    socket.gethostbyname(etcd_host)
+except:
+    print "ETCD_HOST not valid"
     sys.exit(1)
 
 port = 4001
@@ -19,23 +28,23 @@ if ":" in etcd_host:
 client = etcd.Client(host=host, port=int(port))
 
 try:
-    backends = client.read("/backends")
+    client.read("/services")
 except (etcd.EtcdKeyNotFound, KeyError):
-    client.write("/backends", None, dir=True)
+    client.write("/services", None, dir=True)
 
 {{ $local := . }}
 {{range $key, $value := .}}
-{{ $addrLen := len $value.Addresses }}
-{{ if eq $addrLen 1 }}
-{{ with $address := index $value.Addresses 0 }}
 
-{{ if $address.HostPort}}
-# {{ $value.Name }}
+# Container name: {{ $value.Name }}
 
-client.write("/backends/{{ $value.Image.Repository}}/{{printf "%.*s" 12 $value.ID}}", "{{ $local.Env.HOST_IP }}:{{ $address.HostPort }}", ttl=15)
-client.write("/backends/{{ $value.Image.Repository}}/port", "{{ $address.Port }}", ttl=15)
+{{range $address := $value.Addresses}}
 
+{{ if $value.Env.VIRTUAL_HOST }}
+
+client.write("/services/{{ $value.Env.VIRTUAL_HOST}}:{{ $address.Port }}/{{printf "%.*s" 12 $value.ID}}", "{{ $local.Env.HOST_IP }}:{{ $address.HostPort }}", ttl=15)
+
+{{ else }}
+# No VIRTUAL_HOST found
 {{ end }}
 {{ end }}
-{{end}}
 {{end}}
