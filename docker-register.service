@@ -1,14 +1,22 @@
 [Unit]
 Description=docker-register
-After=docker.service
+Requires=docker.socket
+After=docker.socket
 
 [Service]
 EnvironmentFile=/etc/environment
 TimeoutStartSec=0
+Restart=on-failure
+RestartSec=30
+SyslogIdentifier=docker-register
 ExecStartPre=-/usr/bin/docker kill docker-register
 ExecStartPre=-/usr/bin/docker rm docker-register
 ExecStartPre=/usr/bin/docker pull adrianmo/docker-register
-ExecStart=/usr/bin/docker run --name docker-register -e HOST_IP=${COREOS_PRIVATE_IPV4} -e ETCD_HOST=${COREOS_PRIVATE_IPV4}:4001 -v /var/run/docker.sock:/var/run/docker.sock adrianmo/docker-register
+ExecStart=/usr/bin/docker run --name docker-register \
+                              --env=HOST_IP=${COREOS_PRIVATE_IPV4} \
+                              --env=ETCD_HOST=${COREOS_PRIVATE_IPV4}:4001 \
+                              --volume=/var/run/docker.sock:/var/run/docker.sock \
+                              adrianmo/docker-register
 ExecStop=/usr/bin/docker stop docker-register
 
 [X-Fleet]
