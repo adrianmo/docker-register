@@ -33,12 +33,14 @@ except (etcd.EtcdKeyNotFound, KeyError):
 
 {{range $address := $value.Addresses}}
 
+{{ if $address.HostPort }}
 {{ if $value.Env.VIRTUAL_HOST }}
 
 client.write("/services/{{ $value.Env.VIRTUAL_HOST}}:{{ $address.Port }}/{{printf "%.*s" 12 $value.ID}}", "{{ $local.Env.HOST_IP }}:{{ $address.HostPort }}", ttl=15)
 
 {{ else }}
 # No VIRTUAL_HOST found
+{{ end }}
 {{ end }}
 {{ end }}
 {{end}}
