@@ -37,6 +37,14 @@ over port 80, then one will need to use a port 80 and the other a different port
 [4]: https://github.com/airbnb/nerve
 [5]: http://jasonwilder.com/blog/2014/07/15/docker-service-discovery/
 
+### Development
+
+For development, you can run the container using the following command and test your changes.
+
+```
+docker run -ti --rm --name docker-register -v /Users/adrianmo/.docker/machine/machines/default:/default -v $(pwd):/app -e DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY -e DOCKER_CERT_PATH=/default -e DOCKER_HOST=$DOCKER_HOST -e HOST_IP=127.0.0.1 adrianmo/docker-register docker-gen -interval 10 -watch -notify "echo ok" etcd.tmpl /tmp/register.py
+```
+
 ### TODO
 
 * Support http, udp proxying

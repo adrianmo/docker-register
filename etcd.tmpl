@@ -33,14 +33,18 @@ except (etcd.EtcdKeyNotFound, KeyError):
 
 {{range $address := $value.Addresses}}
 
-{{ if $address.HostPort }}
-{{ if $value.Env.VIRTUAL_HOST }}
+{{ if and ($address.HostPort) ($value.Env.VIRTUAL_HOST) }}
 
-client.write("/services/{{ $value.Env.VIRTUAL_HOST}}:{{ $address.Port }}/{{printf "%.*s" 12 $value.ID}}", "{{ $local.Env.HOST_IP }}:{{ $address.HostPort }}", ttl=15)
+{{ range $virtual_host := split $value.Env.VIRTUAL_HOST "," }}
 
-{{ else }}
-# No VIRTUAL_HOST found
+{{ if $virtual_host }}
+
+client.write("/services/{{ $virtual_host}}:{{ $address.Port }}/{{printf "%.*s" 12 $value.ID}}", "{{ $local.Env.HOST_IP }}:{{ $address.HostPort }}", ttl=15)
+
 {{ end }}
+{{ end }}
+{{ else }}
+# VIRTUAL_HOST not set or container port not mapped
 {{ end }}
 {{ end }}
 {{end}}
